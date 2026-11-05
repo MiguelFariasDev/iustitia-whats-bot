@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, "feature/**"]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release — warnings viram erro)
+        run: dotnet build --no-restore -c Release
+
+      - name: Testes unitários
+        run: dotnet test tests/Bot.UnitTests --no-build -c Release
+
+      # O runner do GitHub tem Docker: a fixture sobe o PostgreSQL via Testcontainers.
+      - name: Testes de integração
+        run: dotnet test tests/Bot.IntegrationTests --no-build -c Release

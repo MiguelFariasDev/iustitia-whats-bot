@@ -1,0 +1,27 @@
+# Segredos e variáveis de ambiente — nunca versionar
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.pem
+appsettings.*.local.json
+secrets.json
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+.vscode/
+TestResults/
+coverage/
+*.log
+*.binlog
+
+# SO
+.DS_Store
+Thumbs.db
