@@ -1,0 +1,38 @@
+<Project>
+
+  <!-- Versões alinhadas com o Core (mesmo stack: .NET 10, EF Core 10, Refit 8) para os dois
+       produtos evoluírem juntos. FluentAssertions fica na 6.x (Apache-2.0); a 8.x é comercial. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- HTTP -->
+    <PackageVersion Include="Refit" Version="8.0.0" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+
+    <!-- Persistência (banco PRÓPRIO do Bot — nunca o do Core) -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="EFCore.NamingConventions" Version="10.0.1" />
+
+    <!-- Observabilidade -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />
+
+    <!-- Testes -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.2" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.1.0" />
+  </ItemGroup>
+
+</Project>

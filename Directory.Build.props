@@ -1,0 +1,31 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
+
+    <!-- Só trata warnings como erro em Release, para não travar o dia a dia em Debug -->
+    <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
+
+    <!-- Marca Desacoplada: identidade genérica nos metadados do assembly (a marca só aparece em UI/docs/appsettings) -->
+    <Company>Advocacia</Company>
+    <Product>Advocacia Bot</Product>
+    <Authors>Advocacia</Authors>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Projetos de teste não devem exigir documentação nem tratar warnings como erro -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+</Project>

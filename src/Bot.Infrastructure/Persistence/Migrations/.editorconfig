@@ -1,0 +1,5 @@
+# Migrations são geradas pelo `dotnet ef` no estilo padrão da ferramenta (namespace com
+# escopo de bloco) e nunca devem ser editadas à mão — não vale a pena forçar o estilo do
+# projeto aqui, então relaxamos a regra só para este diretório.
+[*.cs]
+csharp_style_namespace_declarations = block_scoped:silent
