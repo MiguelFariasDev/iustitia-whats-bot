@@ -1,6 +1,6 @@
 # Contrato HTTP com o Core
 
-A fonte de verdade é o Core (`docs/modules/atendimento.md` e ADR-067 no repositório do Core). Este
+A fonte de verdade é o Core (`docs/modules/atendimento.md`, ADR-067 e ADR-068 no repositório do Core). Este
 documento resume o que o Bot usa. Os dois lados têm testes que fixam estes formatos
 (`CoreApiClientTests` aqui; `AtendimentoHandoffFlowTests` no Core).
 
@@ -28,6 +28,47 @@ documento resume o que o Bot usa. Os dois lados têm testes que fixam estes form
 | 401 / 403 | — | Chave revogada/expirada: **transitório** (a Meta reentrega) + alerta de operação |
 | 429 / 5xx / rede | — | Transitório: o webhook responde 500 e a Meta reentrega |
 | outros 4xx | variados | Permanente: loga o código, responde 200 |
+
+## Consulta de andamento (Bot → Core, mesma `X-Api-Key`)
+
+A identidade é verificada **no Core**. O Bot não compara documento, não guarda sessão e não vê o cadastro:
+repassa o que o cliente digitou e age conforme a `etapa`. Base: `/api/v1/bot/atendimentos/{id}/consulta`.
+
+| Chamada | Corpo | Resposta |
+|---|---|---|
+| `POST /iniciar` | — | `200 { etapa }` |
+| `POST /verificar` | `{ documento }` (com ou sem pontuação) | `200 { etapa, processos?: [{ indice, titulo }] }` |
+| `GET  /processos/{indice}` | — | `200 { titulo, fase, ultimoAndamento, atualizadoEm }` |
+
+`etapa`: `AguardandoDocumento` \| `Verificado` \| `Negado` \| `Bloqueado` \| `Expirada`. `processos` vem só em `Verificado` (até 10).
+
+| Etapa | O que o Bot faz |
+|---|---|
+| `AguardandoDocumento` | Pede o CPF/CNPJ (a sessão vale 10 min desde o `iniciar`) |
+| `Verificado` | Lista os títulos; o cliente escolhe um `indice` e o Bot chama `GET processos/{indice}` |
+| `Negado` | Mensagem genérica ("não conseguimos confirmar"). **Mesma resposta** para telefone sem cadastro e para documento errado — o Bot não deve sugerir qual dos dois foi |
+| `Bloqueado` | Informa que a consulta ficou indisponível por um tempo (30 min) e oferece falar com uma pessoa |
+| `Expirada` | Recomeça com `iniciar` |
+
+**Erros específicos**
+
+| HTTP | `errorCode` | Como o Bot trata |
+|---|---|---|
+| 409 | `ATENDIMENTO_CONSULTA_REQUER_BOT` | A conversa não é mais do bot (`PendingHuman`/`Human`/`Closed`): **silêncio**, como em `ATENDIMENTO_BOT_BLOCKED` |
+| 403 | `ATENDIMENTO_CONSULTA_NAO_VERIFICADA` | Sessão expirada/não verificada: recomeçar com `iniciar` (não confundir com chave revogada) |
+| 404 | `ATENDIMENTO_CONSULTA_PROCESSO_NOT_FOUND` | Índice fora da lista: reapresentar a lista |
+
+> **Atenção:** o `403` desta rota é de regra de negócio e carrega `errorCode`; o `403` sem `errorCode`
+> continua sendo chave revogada (transitório, tabela acima). O Bot deve distinguir pelo `errorCode`.
+
+**Privacidade (o que o Bot deve fazer ao consumir)**
+
+- **Nunca** logar o documento, o telefone nem o `ultimoAndamento`; só ids técnicos e `errorCode`.
+- Ao registrar a mensagem do cliente que contém o documento (`POST .../mensagens`), enviar um marcador
+  (ex.: `[mensagem omitida: verificação de identidade]`) em vez do texto. O Core também omite o corpo
+  durante e até 60 s após a verificação, mas isso é só rede de segurança.
+- Repassar `ultimoAndamento` ao cliente como veio; não complementar com outros dados.
+- CPF + telefone é fator de identidade fraco (ver ADR-068); não ampliar o que é mostrado sem decisão do Core.
 
 ## Core → Bot (`X-Api-Key` do Core, `InboundApi:ApiKey`)
 
